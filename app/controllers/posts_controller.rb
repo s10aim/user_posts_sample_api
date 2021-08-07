@@ -1,9 +1,9 @@
 class PostsController < ApplicationController
-  before_action :set_post, only: [:show, :update, :destroy]
+  before_action :set_post, only: %i[show update destroy]
 
   # GET /posts
   def index
-    @posts = Post.all
+    @posts = current_user.posts.order(created_at: :desc)
 
     render json: @posts
   end
@@ -15,7 +15,7 @@ class PostsController < ApplicationController
 
   # POST /posts
   def create
-    @post = Post.new(post_params)
+    @post = current_user.posts.new(post_params)
 
     if @post.save
       render json: @post, status: :created, location: @post
@@ -39,13 +39,14 @@ class PostsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_post
-      @post = Post.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def post_params
-      params.require(:post).permit(:user_id, :body)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_post
+    @post = current_user.posts.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def post_params
+    params.require(:post).permit(:body)
+  end
 end
